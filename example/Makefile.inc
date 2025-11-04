@@ -552,7 +552,7 @@ mesh_node_demo:${CORE_OBJ} ${COMMON_OBJ} ${MESH_OBJ} ${ATT_OBJ} ${GATT_SERVER_OB
 
 clean:
 	rm -f ${EXAMPLES} ${EXAMPLES_GATT_H_FILES}
-	rm -f  *.o *.out *.hex *.exe *.wav *.sbc 
+	rm -f  *.o *.out *.hex *.exe *.so *.dll *.wav *.sbc
 	rm -rf *.dSYM
 	rm -rf ${BTSTACK_ROOT}/src/*.o
 	rm -rf ${BTSTACK_ROOT}/src/ble/*.o

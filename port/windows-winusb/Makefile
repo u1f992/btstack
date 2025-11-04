@@ -40,7 +40,7 @@ EXAMPLES += pan_lwip_http_server
 csr_set_bd_addr: ${CORE_OBJ} ${COMMON_OBJ} btstack_chipset_csr.o csr_set_bd_addr.o
 	${CC} $^ ${CFLAGS} ${LDFLAGS} -o $@
 
-btkeyLib: ${CORE_OBJ} ${COMMON_OBJ} ${CLASSIC_OBJ} ${SDP_CLIENT} btstack_ring_buffer.o hid_device.o btstack_hid_parser.o btkeyLib.o
+btkeyLib.dll: ${CORE_OBJ} ${COMMON_OBJ} ${CLASSIC_OBJ} ${SDP_CLIENT} btstack_ring_buffer.o hid_device.o btstack_hid_parser.o btkeyLib.o
 	${CC} $^ ${CFLAGS} ${LDFLAGS} -g -o $@ -shared
 
 all: ${EXAMPLES}
