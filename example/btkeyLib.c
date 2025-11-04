@@ -15,7 +15,13 @@
 #include <string.h>
 #include <inttypes.h>
 #include <time.h>
+#ifdef _WIN32
 #include <windows.h>
+#define EXPORT_API __declspec(dllexport)
+#else
+#include <unistd.h>
+#define EXPORT_API __attribute__((visibility("default")))
+#endif
 #include "btstack.h"
 #include "btstack_stdin.h"
 
@@ -282,15 +288,22 @@ static uint8_t crcflg1, crcflg2, crcflg3, crcdata1;
 // amiiboデータ送信
 //----------------------------------------------------------
 #if __EnabledAmiibo
-void WINAPI send_amiibo(char* string)
+void EXPORT_API send_amiibo(char* string)
 {
     // TODO: forループ用の変数を減らす
     int a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p;
     FILE* fp;
+#ifdef _WIN32
     errno_t error = fopen_s(&fp, string, "rb");
     if (error != 0) {
         return;
     }
+#else
+    fp = fopen(string, "rb");
+    if (fp == NULL) {
+        return;
+    }
+#endif
     fread(amiibo_all_data, sizeof(uint8_t), 540, fp);
     fclose(fp);
 
@@ -428,7 +441,7 @@ double send_delay = 1/60;
 // DLL関数
 // switchと接続されているかどうかを確認する
 //----------------------------------------------------------
-bool WINAPI gamepad_paired()
+bool EXPORT_API gamepad_paired()
 {
     return paired;
 }
@@ -437,7 +450,7 @@ bool WINAPI gamepad_paired()
 // DLL関数
 // ボタン押下フラグ送信
 //----------------------------------------------------------
-void WINAPI send_button(uint32_t button_status, uint32_t press_time)
+void EXPORT_API send_button(uint32_t button_status, uint32_t press_time)
 {
     UNUSED(press_time);
     //log_info("send_button: %08x %d", button_status, press_time);
@@ -456,7 +469,7 @@ void WINAPI send_button(uint32_t button_status, uint32_t press_time)
 // DLL関数
 // 右スティック状態送信
 //----------------------------------------------------------
-void WINAPI send_stick_r(uint32_t stick_horizontal, uint32_t stick_vertical, uint32_t press_time)
+void EXPORT_API send_stick_r(uint32_t stick_horizontal, uint32_t stick_vertical, uint32_t press_time)
 {
     UNUSED(press_time);
     //if (press_time == 0) press_time = 0xFFFF;
@@ -468,7 +481,7 @@ void WINAPI send_stick_r(uint32_t stick_horizontal, uint32_t stick_vertical, uin
 // DLL関数
 // 左スティック状態送信
 //----------------------------------------------------------
-void WINAPI send_stick_l(uint32_t stick_horizontal, uint32_t stick_vertical, uint32_t press_time)
+void EXPORT_API send_stick_l(uint32_t stick_horizontal, uint32_t stick_vertical, uint32_t press_time)
 {
     UNUSED(press_time);
     //if (press_time == 0) press_time = 0xFFFF;
@@ -480,7 +493,7 @@ void WINAPI send_stick_l(uint32_t stick_horizontal, uint32_t stick_vertical, uin
 // DLL関数
 // ジャイロ状態送信
 //----------------------------------------------------------
-void WINAPI send_gyro(int16_t gyro1, int16_t gyro2, int16_t gyro3)
+void EXPORT_API send_gyro(int16_t gyro1, int16_t gyro2, int16_t gyro3)
 {
     gyro1_flg = gyro1;
     gyro2_flg = gyro2;
@@ -504,7 +517,7 @@ void WINAPI send_gyro(int16_t gyro1, int16_t gyro2, int16_t gyro3)
 // DLL関数
 // 加速度状態送信
 //----------------------------------------------------------
-void WINAPI send_accel(int16_t accel_x, int16_t accel_y, int16_t accel_z)
+void EXPORT_API send_accel(int16_t accel_x, int16_t accel_y, int16_t accel_z)
 {
     accel_x_flg = accel_x;
     accel_y_flg = accel_y;
@@ -516,7 +529,7 @@ void WINAPI send_accel(int16_t accel_x, int16_t accel_y, int16_t accel_z)
 // DLL関数
 // カラー変更
 //----------------------------------------------------------
-void WINAPI send_padcolor(uint32_t pad_color, uint32_t button_color, uint32_t leftgrip_color, uint32_t rightgrip_color)
+void EXPORT_API send_padcolor(uint32_t pad_color, uint32_t button_color, uint32_t leftgrip_color, uint32_t rightgrip_color)
 {
     // コントローラ本体カラー
     reply1050[0x15] = (pad_color >> 0x0) & 0xFF; // B
@@ -545,11 +558,11 @@ void WINAPI send_padcolor(uint32_t pad_color, uint32_t button_color, uint32_t le
 // 振動検知
 //----------------------------------------------------------
 #if __EnabledRumble
-bool WINAPI get_rumble()
+bool EXPORT_API get_rumble()
 {
     return rumble_flag;
 }
-void WINAPI rumble_register(uint32_t key)
+void EXPORT_API rumble_register(uint32_t key)
 {
     rumble_bflag = key;
 }
@@ -687,7 +700,11 @@ static void send_report_joystick(void)
 
     start = clock();
     if (proc_time < send_delay) {
+#ifdef _WIN32
         Sleep((send_delay - proc_time) * 1000);
+#else
+        usleep((send_delay - proc_time) * 1000000);
+#endif
         hid_device_send_interrupt_message(hid_cid, report, sizeof(report));
     } else {
         hid_device_send_interrupt_message(hid_cid, report, sizeof(report));

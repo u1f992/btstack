@@ -8,7 +8,7 @@ COMMON += btstack_audio_portaudio.c btstack_chipset_zephyr.c btstack_chipset_rea
 
 include ${BTSTACK_ROOT}/example/Makefile.inc
 
-CFLAGS  += -g -std=c99 -Wall -Wmissing-prototypes -Wstrict-prototypes -Wshadow -Wunused-parameter -Wredundant-decls -Wsign-compare -Wswitch-default
+CFLAGS  += -g -std=c99 -Wall -Wmissing-prototypes -Wstrict-prototypes -Wshadow -Wunused-parameter -Wredundant-decls -Wsign-compare -Wswitch-default -fPIC
 # CFLAGS += -Werror
 # CFLAGS += -pedantic
 
@@ -45,6 +45,9 @@ EXAMPLES += csr_set_bd_addr
 
 csr_set_bd_addr: ${CORE_OBJ} ${COMMON_OBJ} btstack_chipset_csr.o csr_set_bd_addr.o
 	${CC} $^ ${CFLAGS} ${LDFLAGS} -o $@
+
+btkeyLib.so: ${CORE_OBJ} ${COMMON_OBJ} ${CLASSIC_OBJ} ${SDP_CLIENT} btstack_ring_buffer.o hid_device.o btstack_hid_parser.o btkeyLib.o
+	${CC} $^ ${CFLAGS} ${LDFLAGS} -shared -o $@
 
 # use pkg-config for portaudio
 # CFLAGS  += $(shell pkg-config portaudio-2.0 --cflags) -DHAVE_PORTAUDIO

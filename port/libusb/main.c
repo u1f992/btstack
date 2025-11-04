@@ -371,7 +371,15 @@ int main(int argc, const char * argv[]){
     btstack_main(argc, argv);
 
     // go
-    btstack_run_loop_execute();    
+    btstack_run_loop_execute();
 
     return 0;
+}
+
+void start_gamepad(void){
+    main(0, NULL);
+}
+
+void shutdown_gamepad(void){
+    trigger_shutdown();
 }
