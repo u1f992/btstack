@@ -5,6 +5,9 @@
  * @date	2021.06.20
  */
  //==============================================================================================
+#ifndef _WIN32
+#define _DEFAULT_SOURCE  // Required for usleep() in C99 mode on UNIX-compliant systems
+#endif
 #define BTSTACK_FILE__ "btkeyLib.c"
 #define __EnabledAmiibo true
 #define __EnabledRumble true
@@ -435,7 +438,7 @@ static gamepad_report_t joy;
 //clock_t stick_l_clk;
 clock_t start;
 clock_t end;
-double send_delay = 1/60;
+double send_delay = 1.0/60;
 
 //----------------------------------------------------------
 // DLL関数
@@ -1222,6 +1225,11 @@ static void nintendo_packet_handler(uint8_t packet_type, uint16_t channel, uint8
                                 pairing_state = 0;
                                 joy.timer = tim+1;
                                 paired = true;
+                            }
+                            else if (paired && (pairing_state == 13 || pairing_state == 15))
+                            {
+                                // After responding to info requests, return to normal operation
+                                pairing_state = 0;
                             }
                         }
 
